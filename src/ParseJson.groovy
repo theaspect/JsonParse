@@ -22,7 +22,7 @@ class ParseJson {
 
         URL aURL = new URL(urlList[0].url)
 
-        def pathUrl = aURL.getPath().replaceAll("\\.git","")
+        def pathUrl = aURL.getPath().replaceAll("\\.git", "")
 
         def fileName = 'bower.json'
         def gitHubUserContent = 'https://raw.githubusercontent.com'
@@ -36,13 +36,12 @@ class ParseJson {
 
         String mainUrl = parseData.main
 
-        fileName = mainUrl.replaceAll("\\./","")
+        fileName = mainUrl.replaceAll("\\./", "")
 
         url = gitHubUserContent + '/' + fileName
         def file = new File('main').newOutputStream()
         file << new URL(url).openStream()
         file.close()
-
 
         println(pathUrl)
 

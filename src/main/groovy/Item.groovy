@@ -1,6 +1,3 @@
-/**
- * Created by Arxangel on 06.04.2016.
- */
 class Item {
     def name
     def url

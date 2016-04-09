@@ -1,6 +1,6 @@
 class Item {
-    def name
-    def url
+    String name
+    String url
 
     Item(name, url){
         this.name = name

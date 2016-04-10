@@ -1,24 +1,27 @@
 import groovy.json.JsonSlurper
+import groovyjarjarcommonscli.*
 
 class ParseJson {
 
     def parseData
     def urlList
     String gitHubUserContent
+    String startUrl
 
-    ParseJson(){
+    ParseJson() {
 
         this.parseData = null
         this.urlList = new ArrayList<Item>()
-        this.gitHubUserContent = 'https://raw.githubusercontent.com'
+        this.gitHubUserContent = "https://raw.githubusercontent.com"
+        this.startUrl = "https://bower.herokuapp.com/packages/lookup/angular".toURL().text
     }
 
-    void parseUrl(String url) {
+    void parseUrl() {
 
-        if (url.charAt(0) != "[")
-            url = '[' + url + ']'
+        if (startUrl.charAt(0) != "[")
+            startUrl = '[' + startUrl + ']'
 
-        parseData = new JsonSlurper().parseText(url)
+        parseData = new JsonSlurper().parseText(startUrl)
         parseData.each {
             aUrl ->
                 def http = new Item(aUrl.name, aUrl.url)
@@ -35,15 +38,31 @@ class ParseJson {
         parseData = new JsonSlurper().parseText((gitHubUserContent + '/' + fileName).toURL().text)
     }
 
-    void downloadMainLibrary() {
+    void downloadMainLibrary(String version) {
 
         String mainUrl = parseData.main
 
-        def fileName = mainUrl.replaceAll("\\./", "")
+        String fileName = mainUrl.replaceAll("\\./", "")
 
-        //#  save to file  #//
+        String newFileName
+        def parseTest = new ArrayList()
+        parseTest = fileName.split("\\.")
 
-        inFile(gitHubUserContent + '/' + fileName, fileName)
+        if (version != "master") {
+            newFileName = parseTest[0] + "-" + version + "." + parseTest[1]
+        } else {
+            newFileName = fileName
+        }
+
+
+        if (!isFile(newFileName)) {
+            //#  save to file  #//
+            inFile(gitHubUserContent + '/' + fileName, newFileName)
+        } else {
+            println("the file exists and it isn't empty")
+        }
+
+
     }
 
     void inFile(String url, String fileName) {
@@ -53,27 +72,85 @@ class ParseJson {
         file.close()
     }
 
-    public static void main(String[] args) {
+    boolean isFile(String fileName) {
 
-        //args[0] = 'https://bower.herokuapp.com/packages/lookup/angular' - start url
-        //args[2] = 'bower.json'  - package name
-        //args[1] = 'master'  - version; none version - /master
+        boolean file = new File(fileName).exists()
+        if (file) {
+            File f = new File(fileName)
+            if (f.length() == 0)
+                file = false
+        }
+        return file
+
+    }
+
+    private static Option makeOptionWithArgument(String shortName, String description, boolean isRequired) {
+        Option result = new Option(shortName, true, description);
+        result.setArgs(1);
+        result.setRequired(isRequired);
+
+        return result;
+    }
+
+    static void printHelp(Options options) {
+        final PrintWriter writer = new PrintWriter(System.out);
+        final HelpFormatter helpFormatter = new HelpFormatter();
+
+        helpFormatter.printHelp(
+                writer,
+                80,
+                "[program]",
+                "Options:",
+                options,
+                3,
+                5,
+                "-- HELP --",
+                true);
+
+        writer.flush();
+    }
+
+    public static int work(String[] args) {
+
+        Options options = new Options()
+                .addOption(makeOptionWithArgument("version", "Version", false))
+                .addOption(makeOptionWithArgument("file", "File", true))
+
+        CommandLine commandLine = null;
+        try {
+            commandLine = new GnuParser().parse(options, args)
+        } catch (ParseException e) {
+            printHelp(options);
+            return 255;
+        }
 
         ParseJson parseJson = new ParseJson()
+        def version
+
+        if (commandLine.getOptionValue("version")) {
+            version = commandLine.getOptionValue("version")
+        } else {
+            version = 'master'
+        }
 
         //#  parse start url  #//
 
-        parseJson.parseUrl(args[0].toURL().text)
+        parseJson.parseUrl()
 
         //#  conversion url  #//
 
-        parseJson.conversionUrl(args[1], args[2])
+        parseJson.conversionUrl(version, commandLine.getOptionValue("file"))
 
         //#  download main lib  #//
 
-        parseJson.downloadMainLibrary()
+        parseJson.downloadMainLibrary(version)
 
+        return 0
 
+    }
+
+    public static void main(String[] args) {
+        System.exit(work(args))
     }
 
 }

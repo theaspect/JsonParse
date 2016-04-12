@@ -1,0 +1,18 @@
+2016-04-12 15:13:44,991 WARN ParseJson [Test worker] ------------------Started------------------------
+2016-04-12 15:13:47,353 WARN ParseJson [Test worker] ------------------File not found or incorrect version------------------------
+2016-04-12 15:13:47,363 WARN ParseJson [Test worker] ------------------Started------------------------
+2016-04-12 15:13:49,857 WARN ParseJson [Test worker] ------------------Started------------------------
+2016-04-12 15:13:52,450 WARN ParseJson [Test worker] ------------------Started------------------------
+2016-04-12 15:13:52,676 WARN ParseJson [Test worker] ------------------Package not found------------------------
+2016-04-12 15:13:52,677 WARN ParseJson [Test worker] ------------------Started------------------------
+2016-04-12 15:13:53,462 WARN ParseJson [Test worker] ------------------the file exists and it isn't empty------------------------
+2016-04-12 15:20:53,799 WARN ParseJson [Test worker] File not found or incorrect version
+2016-04-12 15:21:02,351 WARN ParseJson [Test worker] Package not foundhttps://bower.herokuapp.com/packages/lookup/angula
+2016-04-12 15:21:03,150 WARN ParseJson [Test worker] The file exists and it isn't empty
+2016-04-12 15:21:18,049 WARN ParseJson [Test worker] File not found or incorrect version
+2016-04-12 15:21:24,367 WARN ParseJson [Test worker] Package not foundhttps://bower.herokuapp.com/packages/lookup/angula
+2016-04-12 15:21:25,174 WARN ParseJson [Test worker] The file exists and it isn't empty
+2016-04-12 15:21:58,246 WARN ParseJson [Test worker] File not found or incorrect version
+2016-04-12 15:22:03,168 WARN ParseJson [Test worker] Package not foundhttps://bower.herokuapp.com/packages/lookup/angula
+2016-04-12 15:22:03,937 WARN ParseJson [Test worker] The file exists and it isn't empty
+2016-04-12 15:57:48,972 WARN ParseJson [main] The file exists and it isn't empty

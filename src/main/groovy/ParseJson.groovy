@@ -1,12 +1,27 @@
 import groovy.json.JsonSlurper
 import groovyjarjarcommonscli.*
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 class ParseJson {
+
+    Logger logger = LogManager.getLogger(ParseJson.class);
 
     def parseData
     def urlList
     String gitHubUserContent
     String fileName
+    private boolean fileNotFound = true
+    private boolean fileExists = false
+
+    public boolean isFileNotFound(){
+        return fileNotFound
+    }
+
+    public boolean isFileExists(){
+        return fileExists
+    }
 
     ParseJson() {
 
@@ -21,13 +36,13 @@ class ParseJson {
         if (url.charAt(0) != "[")
             url = '[' + url + ']'
 
-        parseData = new JsonSlurper().parseText(url)
 
-        parseData.each {
-            aUrl ->
-                def http = new Item(aUrl.name, aUrl.url)
-                urlList.add(http)
-        }
+            parseData = new JsonSlurper().parseText(url)
+            parseData.each {
+                aUrl ->
+                    def http = new Item(aUrl.name, aUrl.url)
+                    urlList.add(http)
+            }
     }
 
     void conversionUrl(String version) {
@@ -36,7 +51,14 @@ class ParseJson {
 
         gitHubUserContent = gitHubUserContent + aURL.getPath().replaceAll("\\.git", "") + "/" + version
 
-        parseData = new JsonSlurper().parseText((gitHubUserContent + '/' + fileName).toURL().text)
+        try {
+            parseData = new JsonSlurper().parseText((gitHubUserContent + '/' + fileName).toURL().text)
+        }catch (FileNotFoundException e){
+            fileNotFound = false
+            return
+        }
+
+
     }
 
     void downloadMainLibrary(String version) {
@@ -59,9 +81,10 @@ class ParseJson {
         if (!isFile(newFileName)) {
             //#  save to file  #//
             inFile(gitHubUserContent + '/' + fileName, newFileName)
-        } /*else {
-            println("the file exists and it isn't empty")
-        }*/
+        } else {
+            fileExists = true
+            return
+        }
 
 
     }
@@ -134,8 +157,13 @@ class ParseJson {
         } else {
             version = 'master'
         }
-        url = commandLine.getOptionValue("url").toURL().text
 
+        try {
+            url = commandLine.getOptionValue("url").toURL().text
+        }catch (FileNotFoundException e){
+            parseJson.logger.warn("Package not found" + commandLine.getOptionValue("url"));
+            return 1
+        }
         //#  parse start url  #//
 
         parseJson.parseUrl(url)
@@ -144,12 +172,20 @@ class ParseJson {
 
         parseJson.conversionUrl(version)
 
+        if(!parseJson.isFileNotFound()){
+            parseJson.logger.warn("File not found or incorrect version");
+            return 2
+        }
+
         //#  download main lib  #//
 
         parseJson.downloadMainLibrary(version)
+        if(parseJson.isFileExists()){
+            parseJson.logger.warn("The file exists and it isn't empty");
+            return 3
+        }
 
         return 0
-
     }
 
     public static void main(String[] args) {

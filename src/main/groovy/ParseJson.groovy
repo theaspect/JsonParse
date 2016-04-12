@@ -6,22 +6,23 @@ class ParseJson {
     def parseData
     def urlList
     String gitHubUserContent
-    String startUrl
+    String fileName
 
     ParseJson() {
 
         this.parseData = null
         this.urlList = new ArrayList<Item>()
         this.gitHubUserContent = "https://raw.githubusercontent.com"
-        this.startUrl = "https://bower.herokuapp.com/packages/lookup/angular".toURL().text
+        this.fileName = "bower.json"
     }
 
-    void parseUrl() {
+    void parseUrl(String url) {
 
-        if (startUrl.charAt(0) != "[")
-            startUrl = '[' + startUrl + ']'
+        if (url.charAt(0) != "[")
+            url = '[' + url + ']'
 
-        parseData = new JsonSlurper().parseText(startUrl)
+        parseData = new JsonSlurper().parseText(url)
+
         parseData.each {
             aUrl ->
                 def http = new Item(aUrl.name, aUrl.url)
@@ -29,7 +30,7 @@ class ParseJson {
         }
     }
 
-    void conversionUrl(String version, String fileName) {
+    void conversionUrl(String version) {
 
         URL aURL = new URL(urlList[0].url)
 
@@ -58,9 +59,9 @@ class ParseJson {
         if (!isFile(newFileName)) {
             //#  save to file  #//
             inFile(gitHubUserContent + '/' + fileName, newFileName)
-        } else {
+        } /*else {
             println("the file exists and it isn't empty")
-        }
+        }*/
 
 
     }
@@ -114,7 +115,7 @@ class ParseJson {
 
         Options options = new Options()
                 .addOption(makeOptionWithArgument("version", "Version", false))
-                .addOption(makeOptionWithArgument("file", "File", true))
+                .addOption(makeOptionWithArgument("url", "Url", true))
 
         CommandLine commandLine = null;
         try {
@@ -126,20 +127,22 @@ class ParseJson {
 
         ParseJson parseJson = new ParseJson()
         def version
+        def url
 
         if (commandLine.getOptionValue("version")) {
             version = commandLine.getOptionValue("version")
         } else {
             version = 'master'
         }
+        url = commandLine.getOptionValue("url").toURL().text
 
         //#  parse start url  #//
 
-        parseJson.parseUrl()
+        parseJson.parseUrl(url)
 
         //#  conversion url  #//
 
-        parseJson.conversionUrl(version, commandLine.getOptionValue("file"))
+        parseJson.conversionUrl(version)
 
         //#  download main lib  #//
 
